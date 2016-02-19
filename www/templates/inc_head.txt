@@ -7,13 +7,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <!-- Le styles -->
     <link href="{$cfg.abs_root_url}css/bootstrap.min.css" rel="stylesheet">
     <link href="{$cfg.abs_root_url}css/main.source.css" rel="stylesheet">
 
-{if "staff"|@auth_has_role}
-    <link href="{$cfg.abs_root_url}css/admin.source.css" rel="stylesheet">
-{/if}
+    <link href="{$cfg.abs_root_url}css/mapzen.styleguide.css" rel="stylesheet">
+
 
     <script src="{$cfg.abs_root_url}javascript/jquery-2.1.0.min.js"></script>
     <script src="{$cfg.abs_root_url}javascript/bootstrap.min.js"></script>
