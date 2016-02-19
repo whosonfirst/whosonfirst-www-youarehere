@@ -12,9 +12,11 @@
 
     <link href="{$cfg.abs_root_url}css/mapzen.styleguide.css" rel="stylesheet">
 
-
     <script src="{$cfg.abs_root_url}javascript/jquery-2.1.0.min.js"></script>
     <script src="{$cfg.abs_root_url}javascript/bootstrap.min.js"></script>
+
+    <script src="{$cfg.abs_root_url}javascript/youarehere.api.js"></script>
+    <script src="{$cfg.abs_root_url}javascript/htmlspecialchars.js"></script>
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>

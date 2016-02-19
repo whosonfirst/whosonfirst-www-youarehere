@@ -125,6 +125,7 @@ $(document).ready(function(){
 
 	$("#explore").click(function(){
 
+	try {
 		var params = $("#explore-form");
 
 		var method = params.attr("x-data-method");
@@ -151,7 +152,7 @@ $(document).ready(function(){
 			req_args[p['name']] = p['value'];
 		}
 
-		var endpoint = flamework_api_endpoint();
+		var endpoint = youarehere_api_endpoint();
 
 		var req = "curl -X " + http_method;
 		req += " ";
@@ -207,8 +208,13 @@ $(document).ready(function(){
 			show_caveat();
 		};
 
-		flamework_api_call(method, args, on_success, on_error);
+		youarehere_api_call(method, args, on_success, on_error);
 		return false;
+
+		} catch(e) {
+		  console.log(e);
+		  return false;
+		}
 	});
 
 
