@@ -1,0 +1,146 @@
+{if !$rsp.ok}
+<p class="error">Well, that's no good. The geo servers appear to be upset and
+not willing to play nicely, right now. Let's marvel at the terseness of their
+error messages. For example, this is what they've told us so far: <q>{$rsp.error|escape}</q></p>
+
+{elseif $rsp.data|@count == 0}
+
+{if !$fallback_tree|@count}
+<p class="error">Hrm... We can't find any <q>{$filter|escape}</q> for this location.</p>
+{else}
+
+<p class="error">Hrm... okay. We can't find any <q>{$filter|escape}</q> for this location. Would you like to try situating yourself in a more general place?</p>
+
+<form id="choices-other" method="GET" action="{$cfg.abs_root_url}decide/">
+<input type="hidden" name="lat" value="{$latitude|escape}" />
+<input type="hidden" name="lon" value="{$longitude|escape}" />
+
+<select name="filter" id="whereami-places">
+<optgroup>
+<option selected="selected"/>
+</optgroup>
+{* there is no reason to expect that there will be 'falldown' options... right? *}
+<optgroup>
+{foreach from=$fallback_tree item="ignore" key="fallback"}
+<option value="{$fallback|escape}">Let's try {$fallback|escape}, instead.</option>
+{/foreach}
+</optgroup>
+</select>
+
+<input type="submit" value="LET'S SEE ABOUT THAT" />
+</form>
+{/if}
+
+{else}
+
+{include file="inc_map.txt" show_crosshairs=0}
+
+<div id="assertion-select">
+
+<form id="choices" method="POST" action="{$cfg.abs_root_url}decide/">
+{$crumb_key|crumb_input}
+<input type="hidden" name="choose" value="1" />
+<input type="hidden" name="lat" value="{$latitude|escape}" />
+<input type="hidden" name="lon" value="{$longitude|escape}" />
+<input type="hidden" name="filter" value="{$filter|escape}" />
+	
+<span class="assertion-select">
+
+<span class="assertion-select-text">It appears that you are in</span>
+
+<select name="whereami" id="whereami-places">
+<optgroup>
+<option selected="selected"/>
+</optgroup>
+<optgroup>
+{foreach from=$rsp.data item="row"}
+<option value="{$row.woe_id|escape}" id="woe-{$row.woe_id|escape}" class="location">{if $row.name}{$row.name|escape}{else}{$row.label|escape}{/if}</option>
+{/foreach}
+</optgroup>
+
+{* TO DO: scrumjax this eventually (20130324/straup) *}
+
+{if $falldown_tree|@count}
+<optgroup>
+{foreach from=$falldown_tree item="ignore" key="falldown"}
+<option value="-3-{$falldown|escape}">I would like to see the {$falldown|escape}.</option>
+{/foreach}
+</optgroup>
+{/if}
+
+{if $fallback_tree|@count}
+<optgroup>
+{foreach from=$fallback_tree item="ignore" key="fallback"}
+<option value="-2-{$fallback|escape}">Let's try {$fallback|escape}, instead.</option>
+{/foreach}
+</optgroup>
+{/if}
+
+<optgroup><option value="-1">Meh. It's all wrong. I give up.</option></optgroup>
+</select>
+
+</span>
+
+<span class="assertion-select">
+<span class="assertion-select-text">and you're saying this as</span>
+
+<select name="perspective" id="whereami-perspective">
+<option value="0" />
+{foreach from=$perspective_map item="label" key="id"}
+<option value="{$id|escape}">{$label|escape}</option>
+{/foreach}
+</select>
+
+<input type="submit" value="WORD" id="assertion-select-submit" class="assertion-select" />
+
+</form>
+
+</span>
+
+</div>
+
+{if $previous|@count}
+
+<p class="caveat">We noticed that you've added some assertions around this spot in the past. Go ahead and add another if you'd like but here's the list of of stuff you've already told us about.</p>
+
+<table id="assertion-details" class="table table-condensed table-bordered">
+{include file="inc_assertion_details_header.txt" assertion_row=$previous.0}
+
+{foreach from=$previous item="assertion"}
+{include file="inc_assertion_details_row.txt" assertion_row=$assertion}
+{/foreach}
+
+</table>
+
+{/if}
+
+<script type="text/javascript">
+$(document).ready(function(){literal}{{/literal}
+	var latlons = [[{$latitude|escape}, {$longitude|escape}]];
+	var geojson = youarehere_map_latlons_to_geojson(latlons);
+	youarehere_map_init(geojson);
+
+	var woeids = [{foreach from=$rsp.data item="row" name="woeids"}{$row.woe_id|escape}{if !$smarty.foreach.woeids.last},{/if}{/foreach}];
+	youarehere_woe_draw_shapes(woeids);
+
+	{literal}
+	$("#whereami-places").change(function(){
+
+		var perspective = $("#whereami-perspective");
+
+		var youarehere = $(this).attr('value');
+
+		if (youarehere == -2){
+			perspective.attr("disabled", "disabled");
+		}
+
+		else {
+			perspective.removeAttr("disabled");
+		}
+	});
+	{/literal}
+
+{literal}}{/literal});
+</script>
+
+{/if}

@@ -1,0 +1,151 @@
+#
+# Hey! Everything in here is better suited to httpd.conf, since
+# we get a performance boost if we can turn off AllowOverride and
+# not have to stat the webroot for every request. On the other
+# hand, this means we never have to touch apache once it's up.
+# Flexibility over performance.
+#
+# In an ideal world, you'd stick it in here on dev and your build
+# system would bundle the changes into (a file included in) httpd.conf
+# for your production deployment, perhaps wrapped in a <VirtualHost>
+# block.
+#
+
+# ETags are a bad idea if you have multiple web servers. We'll do
+# more explicit caching with Expires headers anyway.
+FileETag none
+
+# The base set of sensible PHP options. You could put these in your
+# php.ini file too, but having them in your Apache config puts
+# everything in one place. Magic quotes off because they are stupid.
+# Register globals off for the same reason. Track errors is so that
+# we can at least get at the error messages we hide using @func().
+# last_modified is a bad idea if we have any dynamic content. Short
+# tags make for a few saved bytes of cruft and are fine unless you're
+# running another XML preprocessor over your code (wtf?).
+php_value magic_quotes_gpc 0
+php_value register_globals 0
+php_value magic_quotes_runtime 0
+php_value track_errors 1
+php_value last_modified off
+php_value short_open_tag on
+
+# This value is very useful for development, but should be disabled
+# on production deployments (by setting the value to 'off')
+php_flag display_errors on
+
+# this sets all current and future error flags on, except for E_NOTICE
+# which can go fuck itself. we have some separate code for checking the
+# one notice we do care about.
+php_value error_reporting 2147483639
+
+# Some basic pointers to php files
+DirectoryIndex index.php
+ErrorDocument 404 /404.php
+ErrorDocument 403 /403.php
+
+# Get mod_rewrite fired up
+RewriteEngine on
+
+# API stuff (part one - there is only HTTPS)
+
+# Better off put in your Apache config for the host itself but
+# you can do it here if you need/want to. See also:
+# https://httpd.apache.org/docs/2.2/rewrite/avoid.html
+
+# RewriteCond %{HTTPS} off
+# RewriteRule (.*) https://%{HTTP_HOST}/$1?%{QUERY_STRING}	[R,L]
+
+# You are here
+
+RewriteRule   ^choose/?$				choose.php?%{QUERY_STRING}			[L]
+RewriteRule   ^getlatlon/?$				choose.php?%{QUERY_STRING}			[L]
+
+RewriteRule   ^decide/?$				decide.php?%{QUERY_STRING}			[L]
+RewriteRule   ^maybe/?$					/decide/?%{QUERY_STRING}			[R]
+
+# Assertions
+
+RewriteRule   ^assertions(/page([0-9]+))?/?$						assertions.php?page=$2&%{QUERY_STRING}	[L]
+RewriteRule   ^assertions/(locals|tourists|strangers)(/page([0-9]+))?/?$		assertions.php?perspective=$1&page=$3&%{QUERY_STRING}	[L]
+
+RewriteRule   ^a/([A-Za-z0-9]+)/?$							assertion.php?code=$1&%{QUERY_STRING}		[L]
+RewriteRule   ^assertions/([0-9]+)/?$							assertion.php?id=$1&%{QUERY_STRING}		[L]
+
+RewriteRule   ^assertions/me(/page([0-9]+))?/?$						assertions_me.php?page=$2&%{QUERY_STRING}	[L]
+RewriteRule   ^assertions/me/(local|tourist|stranger)(/page([0-9]+))?/?$		assertions_me.php?perspective=$1&page=$3&%{QUERY_STRING}	[L]
+
+RewriteRule   ^assertions/woe/?$							/assertions/  [R]
+
+RewriteRule   ^assertions/woe/([0-9]+)(/page([0-9]+))?/?$				assertions_woe.php?id=$1&page=$3&%{QUERY_STRING}	[L]
+RewriteRule   ^assertions/woe/([0-9]+)/(locals|tourists|strangers)(/page([0-9]+))?/?$	assertions_woe.php?id=$1&perspective=$2&page=$4&%{QUERY_STRING}	[L]
+
+# Old stuff (TO DO...)
+
+RewriteRule   ^corrections/?$								/assertions/			[R]
+RewriteRule   ^corrections/page([0-9]+)/?$						/assertions/page$2/		[R]
+RewriteRule   ^corrections/(locals|tourists|strangers)/?$				/assertions/$1/			[R]
+RewriteRule   ^corrections/(locals|tourists|strangers)(/page([0-9]+))?/?$		/assertions/$1/page$3/		[R]
+
+RewriteRule   ^c/([A-Za-z0-9]+)/?$							/a/$1/				[R]
+RewriteRule   ^corrections/([0-9]+)/?$							/assertions/$1/			[R]
+
+RewriteRule   ^corrections/me/?$							/assertions/me/			[R]
+RewriteRule   ^corrections/me(/page([0-9]+))?/?$					/assertions/me/page$2/		[R]
+RewriteRule   ^corrections/me/(local|tourist|stranger)/?$				/assertions/me/$1/		[R]
+RewriteRule   ^corrections/me/(local|tourist|stranger)(/page([0-9]+))?/?$		/assertions/me/$1/page$3	[R]
+
+RewriteRule   ^corrections/woe/?$							/assertions/  [R]
+
+RewriteRule   ^corrections/woe/([0-9]+)/?$						/assertions/woe/$1/		[R]
+RewriteRule   ^corrections/woe/([0-9]+)(/page([0-9]+))?/?$				/assertions/woe/$1/page$3/	[R]
+
+RewriteRule   ^corrections/woe/([0-9]+)/(locals|tourists|strangers)/?$				/assertions/woe/$1/$2/		[R]
+RewriteRule   ^corrections/woe/([0-9]+)/(locals|tourists|strangers)(/page([0-9]+))?/?$		/assertions/woe/$1/$2/page$4/	[R]
+
+# WOE 
+
+RewriteRule   ^woe/([0-9]+)/?$						/assertions/woe/$1	[R]
+RewriteRule   ^woe/([0-9]+)/geojson/?$					woedb_geojson.php?id=$1&%{QUERY_STRING}	[L]
+
+# Login stuff
+
+RewriteRule	^signin/?$		signin_twitter_oauth.php?%{QUERY_STRING}	[L]
+RewriteRule	^auth/?$		auth_callback_twitter_oauth.php?%{QUERY_STRING}	[L]
+
+RewriteRule  ^signout$			signout.php		[L]
+RewriteRule  ^checkcookie$		checkcookie.php	[L]
+
+# Account stuff
+
+RewriteRule  ^account$			account.php		[L]
+RewriteRule  ^account/delete$		account_delete.php	[L]
+
+# General pages
+
+RewriteRule ^about$			about.php 		[L,QSA]
+RewriteRule ^colophon$			colophon.php 		[L,QSA]
+
+# RewriteRule ^contact$			contact.php 		[L,QSA]
+
+# API stuff (part deux)
+
+RewriteRule  ^api/?$			api.php		[L]
+RewriteRule  ^api/methods/?$		api_methods.php	[L]
+RewriteRule  ^api/methods/(.*)/?$	api_method.php?method=$1&%{QUERY_STRING}		[L]
+
+RewriteRule  ^api/keys/?$						api_keys.php?%{QUERY_STRING} [L]
+RewriteRule  ^api/keys/register/?$					api_keys_register.php?%{QUERY_STRING} [L]
+RewriteRule  ^api/keys/([a-zA-Z0-9]+)/?$				api_key.php?api_key=$1&%{QUERY_STRING} [L]
+RewriteRule  ^api/keys/([a-zA-Z0-9]+)/tokens(/page([0-9]+))?/?$		api_key_tokens.php?api_key=$1&page=$3&%{QUERY_STRING} [L]
+
+RewriteRule  ^api/oauth2/?$						api_oauth2.php?%{QUERY_STRING} [L]
+RewriteRule  ^api/oauth2/howto/?$					api_oauth2_howto.php?%{QUERY_STRING} [L]
+RewriteRule  ^api/oauth2/authenticate/?$				api_oauth2_authenticate.php?%{QUERY_STRING} [L]
+RewriteRule  ^api/oauth2/authenticate/like-magic/?$			api_oauth2_authenticate_like_magic.php?%{QUERY_STRING} [L]
+RewriteRule  ^api/oauth2/access_token/?$				api_oauth2_access_token.php?%{QUERY_STRING} [L]
+
+RewriteRule  ^api/oauth2/tokens(/page([0-9]+))?/?$			api_oauth2_tokens.php?page=$2&%{QUERY_STRING} [L]
+RewriteRule  ^api/oauth2/tokens/([a-zA-Z0-9]+)/?$			api_oauth2_token.php?api_key=$1&%{QUERY_STRING} [L]
+
+RewriteRule  ^api/rest/?$						api_rest.php?%{QUERY_STRING}  [L]

@@ -1,0 +1,13 @@
+<tr>
+{foreach from=$assertion_row|@array_keys item="label"}
+
+{if $label=='user_id' and !"show_users"|@features_is_enabled}
+	{* pass *}
+{elseif $label=='remote_address' and !"show_remote_address"|@features_is_enabled}
+	{* pass *}
+{else}
+	<th>{$label|replace:"_":" "|upper|escape}</th>
+{/if}
+
+{/foreach}
+</tr>

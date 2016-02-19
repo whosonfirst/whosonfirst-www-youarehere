@@ -1,0 +1,4 @@
+*.conf
+.htusers
+.htgroups
+*.conf

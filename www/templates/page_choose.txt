@@ -1,0 +1,56 @@
+{capture assign="page_title"}choose{/capture}
+{capture assign="extra_head"}
+<script src="{$cfg.abs_root_url}javascript/youarehere.getlatlon.js"></script>
+{/capture}
+{include file="inc_head.txt"}
+
+{include file="inc_map_getlatlon.txt"}
+
+{if $geojson && $geojson.features|@count}
+
+<ul>
+{foreach from=$geojson.features item="row"}
+<li><a href="#" onclick="javascript:youarehere_getlatlon_jumpto({$row.properties.latitude|escape},{$row.properties.longitude|escape}{if $row.bbox},'{$row.bbox|@implode:","|escape}'{/if});return false;">{$row.properties.displayname|escape}</a></li>
+{/foreach}
+</ul>
+
+<script type="text/javascript">
+
+var geojson = JSON.parse('{$geojson|@json_encode}');
+{literal}
+$(document).ready(function(){
+	var extent = [[-90, -180], [90, 180]];
+	var map = youarehere_getlatlon_map();
+	map.fitBounds(extent);
+
+	youarehere_getlatlon_set_viewport(geojson);
+	youarehere_getlatlon_draw_features(geojson);
+
+	$("#getlatlon-crosshairs").dblclick(function(e){
+		var offset = (e.shiftKey) ? -1 : 1;
+		var map = youarehere_getlatlon_map();
+		map.setZoom(map.getZoom() + offset);
+	});
+});
+{/literal}
+</script>
+
+{else}
+
+{if $geojson}
+<p class="error"><q>{$smarty.get.q|escape}</q> is not any place that we know about. Try again?</p>
+{/if}
+
+<script type="text/javascript">
+{literal}
+$(document).ready(function(){
+	var extent = [[-90, -180], [90, 180]];
+	var map = youarehere_getlatlon_map();
+	map.fitBounds(extent);
+});
+{/literal}
+</script>
+
+{/if}
+
+{include file="inc_foot.txt"}

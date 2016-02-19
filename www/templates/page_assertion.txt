@@ -1,0 +1,21 @@
+{capture assign="page_title"}assertion #{$assertion.id}{/capture}
+{include file="inc_head.txt"}
+
+{if $delete_error}
+<p class="error">Ack! There was a problem deleting that assertion.</p>
+{/if}
+
+{* note: we are setting both the assertion and a list of assertions in the app code *}
+{* this is not ideal but it makes the following work... sort of (20130204/straup) *}
+
+{include file="inc_assertions_list.txt" delete_me=1}
+
+{if $assertion.woe_id >= 0}
+<script type="text/javascript">
+$(document).ready(function(){literal}{{/literal}
+	youarehere_assertion_draw_map('{$assertion|@urls_assertion_export_url}');
+{literal}}{/literal});
+</script>
+{/if}
+
+{include file="inc_foot.txt"}

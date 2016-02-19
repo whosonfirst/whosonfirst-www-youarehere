@@ -1,0 +1,6 @@
+<div id ="map-container">
+{if $show_crosshairs}<div class="pointer" id="map-decide-coords"></div>{/if}
+<div id="map"></div>
+{if $show_crosshairs}<div id="map-decide-crosshairs"></div>{/if}
+<div id="map-feedback"></div>
+</div>
