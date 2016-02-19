@@ -3,12 +3,8 @@
       <hr>
 
       <footer>
-        <p>&copy; Company {$smarty.now|date_format:"%Y"}</p>
+        <p>this is a <a href="https://www.mapzen.com/">mapzen</a> gig</p>
       </footer>
-
-{if "staff"|@auth_has_role}
-      	{timings}
-{/if}
 
     </div> <!-- /container -->
 

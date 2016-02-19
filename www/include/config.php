@@ -3,7 +3,7 @@
 
 	# Things you may want to change in a hurry
 
-	$GLOBALS['cfg']['site_name'] = 'You Are Here';
+	$GLOBALS['cfg']['site_name'] = 'you are here';
 	$GLOBALS['cfg']['environment'] = 'dev';
 
 	$GLOBALS['cfg']['site_disabled'] = 0;
