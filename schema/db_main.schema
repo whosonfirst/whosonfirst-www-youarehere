@@ -31,7 +31,7 @@ DROP TABLE IF EXISTS `Assertions`;
 CREATE TABLE `Assertions` (
   `id` BIGINT(20) unsigned NOT NULL,
   `user_id` INT(10) unsigned NOT NULL,
-  `woe_id` BIGINT(20) signed NOT NULL,
+  `wof_id` BIGINT(20) signed NOT NULL,
   `latitude` decimal(9,6) DEFAULT NULL,
   `longitude` decimal(9,6) DEFAULT NULL,
   `created` int(10) unsigned NOT NULL,
@@ -41,11 +41,11 @@ CREATE TABLE `Assertions` (
   PRIMARY KEY (`id`),
   KEY `by_user` (`user_id`, `created`),
   KEY `by_user_perspective` (`user_id`, `perspective`, `created`),
-  KEY `by_user_woe` (`user_id`, `woe_id`, `created`),
-  KEY `by_user_woe_perspective` (`user_id`, `woe_id`, `perspective`, `created`),
+  KEY `by_user_woe` (`user_id`, `wof_id`, `created`),
+  KEY `by_user_woe_perspective` (`user_id`, `wof_id`, `perspective`, `created`),
   KEY `by_user_latlon` (`user_id`, `latitude`, `longitude`, `created`),
-  KEY `by_woe` (`woe_id`, `created`),
-  KEY `by_woe_perspective` (`woe_id`, `perspective`, `created`),
+  KEY `by_wof` (`wof_id`, `created`),
+  KEY `by_wof_perspective` (`wof_id`, `perspective`, `created`),
   KEY `by_perspective` (`perspective`, `created`),
   KEY `by_timestamp` (`created`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -56,7 +56,7 @@ CREATE TABLE `AssertionsRedacted` (
   `assertion_id` BIGINT(20) unsigned NOT NULL,
   `redacted` int(10) unsigned NOT NULL,
   PRIMARY KEY (`assertion_id`),
-  KEY `by_date` (`redacted`),
+  KEY `by_date` (`redacted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `TwitterUsers`;
@@ -69,6 +69,7 @@ CREATE TABLE `TwitterUsers` (
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `by_twitterid` (`twitter_id`)
 )  ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `ApiKeys`;
 
 CREATE TABLE `ApiKeys` (
